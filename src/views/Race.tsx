@@ -43,10 +43,14 @@ export function Race({ raceKey, tab, index }: { raceKey: number; tab: RaceTab; i
     [index, raceKey],
   );
 
+  // a race the index knows about but has no files for yet: nothing to fetch
+  const waiting = summary && summary.status !== 'ready' ? summary.status : null;
+
   useEffect(() => {
     let alive = true;
     setSession(null);
     setError(null);
+    if (waiting) return;
     loadSession(raceKey, (f) => alive && setProgress(f)).then(
       (s) => {
         if (!alive) return;
@@ -65,21 +69,21 @@ export function Race({ raceKey, tab, index }: { raceKey: number; tab: RaceTab; i
       alive = false;
       clock.pause();
     };
-  }, [raceKey]);
+  }, [raceKey, waiting]);
 
   const live = useMemo(() => (session ? new LiveTiming(session) : null), [session]);
   const ctx = useMemo(() => (session && live ? { session, live } : null), [session, live]);
 
-  if (error || (summary && summary.status !== 'ready')) {
+  if (error || waiting) {
     return (
       <div className="loader">
         <div className="loader-inner">
           <div className="label">{summary?.name ?? `Session ${raceKey}`}</div>
-          <div className="loader-title">{error ? 'Session not in the lake' : 'Not raced yet'}</div>
+          <div className="loader-title">{waiting === 'upcoming' ? 'Not raced yet' : waiting ? 'Awaiting data' : 'Session not in the lake'}</div>
           <p className="dim" style={{ margin: '10px 0 18px' }}>
-            {error
-              ? 'This session has not been ingested yet.'
-              : 'This race appears here once its data has been ingested after the chequered flag.'}
+            {waiting
+              ? 'This race appears here once its data has been ingested after the chequered flag.'
+              : 'This session has not been ingested yet.'}
           </p>
           <a className="btn ghost" href={href({ name: 'home' })}>
             Back to the season
