@@ -380,7 +380,7 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
       n: m.driver_number ?? null,
       msg: m.message ?? '',
     }))
-    .filter((m) => m.t >= -600 && m.t <= duration)
+    .filter((m) => m.t >= -600 && m.t <= duration && m.flag !== 'BLUE')
     .sort((a, b) => a.t - b.t);
 
   const status = [];

@@ -1,0 +1,445 @@
+/* ---- home ---------------------------------------------------------------------------- */
+
+.home {
+  flex: 1;
+}
+
+.hero {
+  position: relative;
+  min-height: min(calc(100dvh - var(--nav-h)), 980px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(28px, 6vh, 72px) clamp(20px, 4vw, 64px) clamp(20px, 3.5vh, 36px);
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-scene {
+  position: absolute;
+  inset: 0;
+  left: 34%;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+  pointer-events: none;
+}
+.hero-scene.is-ready {
+  opacity: 1;
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--bg) 30%, rgba(7, 8, 10, 0.7) 46%, rgba(7, 8, 10, 0) 66%),
+    linear-gradient(0deg, var(--bg) 0%, rgba(7, 8, 10, 0) 26%),
+    linear-gradient(180deg, rgba(7, 8, 10, 0.7), rgba(7, 8, 10, 0) 16%);
+}
+
+.hero-copy,
+.hero-foot {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-stretch: 112%;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.hero-title {
+  margin-top: clamp(18px, 3vh, 30px);
+  font-size: clamp(44px, 7vw, 124px);
+  letter-spacing: -0.035em;
+  line-height: 0.86;
+}
+.hero-title span {
+  display: block;
+}
+.hero-title .is-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--hot);
+}
+
+.hero-sub {
+  max-width: 50ch;
+  margin-top: clamp(20px, 3.4vh, 34px);
+  font-size: clamp(14.5px, 1.25vw, 17.5px);
+  line-height: 1.58;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: clamp(22px, 3.4vh, 34px);
+}
+
+.hero-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: clamp(22px, 3.4vw, 54px);
+  flex-wrap: wrap;
+}
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line-3);
+}
+.hero-stat b {
+  font-size: clamp(22px, 2.3vw, 34px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.hero-live {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 270px;
+  padding: 12px 14px 13px;
+  background: rgba(11, 13, 16, 0.72);
+  border: 1px solid var(--line-2);
+  border-left: 2px solid var(--c);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s;
+}
+.hero-live:hover {
+  border-color: var(--line-3);
+  border-left-color: var(--c);
+}
+.hero-live b {
+  font-size: 15px;
+  font-weight: 800;
+  font-stretch: 120%;
+  text-transform: uppercase;
+}
+.hero-live .num {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.hero-live .num i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 3px 0 2px;
+  background: var(--c);
+  transition: background 0.3s;
+}
+
+/* ---- sections ------------------------------------------------------------------------ */
+
+.season,
+.modules {
+  padding: clamp(48px, 8vh, 96px) clamp(20px, 4vw, 64px) 0;
+}
+.modules {
+  padding-bottom: clamp(56px, 9vh, 110px);
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 40px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.section-head h2 {
+  margin-top: 12px;
+  font-size: clamp(30px, 4.2vw, 62px);
+  letter-spacing: -0.03em;
+}
+.section-head p {
+  max-width: 38ch;
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+
+.racegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+  gap: 8px;
+}
+
+.racecard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  transition: border-color 0.3s, background 0.3s, transform 0.4s var(--ease-out);
+  animation: rise 0.7s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 45ms);
+}
+a.racecard:hover {
+  background: var(--bg-2);
+  border-color: var(--line-3);
+  transform: translateY(-3px);
+}
+.racecard.is-off {
+  background: transparent;
+  border-style: dashed;
+}
+
+.rc-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.rc-round {
+  font-weight: 600;
+  color: var(--hot);
+}
+.racecard.is-off .rc-round {
+  color: var(--ink-3);
+}
+.rc-date {
+  color: var(--ink-3);
+}
+
+.rc-outline {
+  height: 168px;
+  display: grid;
+  place-items: center;
+  margin: 4px 0 8px;
+}
+.rc-tbd {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.outline {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.outline path {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.outline-line {
+  stroke: var(--ink-2);
+  stroke-width: 1.6;
+  transition: stroke 0.35s;
+}
+.outline-glow {
+  stroke: var(--c);
+  stroke-width: 7;
+  opacity: 0;
+  filter: blur(5px);
+  transition: opacity 0.35s;
+}
+.outline-dot {
+  fill: var(--c);
+  stroke: var(--bg-2);
+  stroke-width: 8;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.racecard:hover .outline-line {
+  stroke: var(--c);
+}
+.racecard:hover .outline-glow {
+  opacity: 0.55;
+}
+.racecard:hover .outline-dot {
+  opacity: 1;
+}
+
+.rc-name h3 {
+  font-size: 19px;
+  font-weight: 800;
+  font-stretch: 122%;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 1.05;
+}
+.rc-name span {
+  display: block;
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.rc-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.rc-foot .team-bar {
+  height: 14px;
+}
+.rc-foot b {
+  font-weight: 800;
+  font-stretch: 115%;
+  letter-spacing: 0.04em;
+}
+.rc-winner {
+  color: var(--ink-2);
+}
+.rc-podium {
+  display: flex;
+  gap: 6px;
+  margin-left: 4px;
+}
+.rc-podium em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-4);
+}
+.rc-time {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink-3);
+  transition: opacity 0.2s;
+}
+.rc-foot.is-empty {
+  min-height: 15px;
+}
+
+.rc-open {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hot);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.25s, transform 0.3s var(--ease-out);
+}
+.racecard:hover .rc-open {
+  opacity: 1;
+  transform: none;
+}
+.racecard:hover .rc-time {
+  opacity: 0;
+}
+
+/* ---- modules ------------------------------------------------------------------------- */
+
+.module-list {
+  border-top: 1px solid var(--line-2);
+}
+
+.module {
+  display: grid;
+  grid-template-columns: 64px minmax(180px, 0.9fr) minmax(0, 2fr) 30px;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 8px;
+  border-bottom: 1px solid var(--line-2);
+  transition: background 0.3s, padding 0.4s var(--ease-out);
+}
+.module .num {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.module h3 {
+  font-size: clamp(22px, 2.6vw, 38px);
+  letter-spacing: -0.02em;
+  transition: color 0.25s;
+}
+.module p {
+  max-width: 62ch;
+  font-size: 14px;
+  color: var(--ink-3);
+  transition: color 0.25s;
+}
+.module svg {
+  color: var(--ink-4);
+  transition: color 0.25s, transform 0.4s var(--ease-out);
+}
+.module:hover {
+  background: var(--bg-1);
+  padding-left: 22px;
+}
+.module:hover h3 {
+  color: var(--hot);
+}
+.module:hover p {
+  color: var(--ink-2);
+}
+.module:hover svg {
+  color: var(--hot);
+  transform: translateX(6px);
+}
+
+@media (max-width: 860px) {
+  .hero-scene {
+    left: 0;
+    opacity: 0;
+  }
+  .hero-scene.is-ready {
+    opacity: 0.55;
+  }
+  .hero-scrim {
+    background: linear-gradient(0deg, var(--bg) 4%, rgba(7, 8, 10, 0.35) 55%, rgba(7, 8, 10, 0.75));
+  }
+  .hero-live {
+    width: 100%;
+  }
+  .module {
+    grid-template-columns: 34px minmax(0, 1fr) 22px;
+    gap: 6px 12px;
+    padding: 18px 4px;
+  }
+  .module p {
+    grid-column: 2 / 3;
+    grid-row: 2;
+  }
+  .module svg {
+    grid-row: 1;
+    grid-column: 3;
+  }
+  .racegrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  .rc-outline {
+    height: 110px;
+  }
+  .rc-podium,
+  .rc-time {
+    display: none;
+  }
+}

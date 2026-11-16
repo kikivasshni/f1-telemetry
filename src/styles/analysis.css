@@ -1,0 +1,460 @@
+/* Telemetry, Engineer and Report tabs */
+
+.analysis {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  min-height: 0;
+}
+
+.race-telemetry {
+  flex: none;
+  height: calc(100dvh - var(--nav-h));
+  overflow: hidden;
+}
+
+.swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+}
+
+/* ---- pair bar ------------------------------------------------------------------------ */
+
+.pairbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  animation: rise 0.5s var(--ease-out) both;
+  position: relative;
+  z-index: 10;
+}
+
+.pair-side {
+  display: flex;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+}
+.pair-side > * + * {
+  border-left: 1px solid var(--line-2);
+}
+
+.pair-swap {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--ink-3);
+  border-radius: 50%;
+  transition: color 0.2s, transform 0.4s var(--ease-out);
+}
+.pair-swap:hover {
+  color: var(--ink);
+  transform: rotate(180deg);
+}
+
+.pair-result {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.pair-result b {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dd {
+  position: relative;
+}
+
+.dd-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 12px 0 10px;
+  transition: background 0.15s;
+}
+.dd-btn:hover,
+.dd.is-open .dd-btn {
+  background: var(--bg-3);
+}
+.dd-btn .team-bar {
+  height: 18px;
+  align-self: center;
+}
+.dd-caret {
+  margin-left: 4px;
+  color: var(--ink-3);
+  transition: transform 0.25s var(--ease-out);
+}
+.dd.is-open .dd-caret {
+  transform: rotate(180deg);
+}
+
+.dd-code {
+  font-weight: 800;
+  font-stretch: 118%;
+  letter-spacing: 0.04em;
+}
+.dd-btn .dd-code {
+  font-size: 15px;
+}
+.dd-name {
+  color: var(--ink-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.dd-team {
+  margin-left: auto;
+  padding-left: 14px;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.dd-lapno {
+  font-size: 15px;
+  font-weight: 600;
+}
+.dd-laptime {
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.dd-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: -1px;
+  z-index: 40;
+  min-width: 280px;
+  max-height: min(460px, 62vh);
+  overflow-y: auto;
+  background: rgba(16, 19, 23, 0.97);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(14px);
+  animation: dd-in 0.22s var(--ease-out);
+}
+.dd-lap .dd-menu {
+  min-width: 220px;
+}
+
+@keyframes dd-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 31px;
+  padding: 0 12px 0 10px;
+  font-size: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.dd-item:hover:not(:disabled) {
+  background: rgba(237, 235, 230, 0.06);
+}
+.dd-item.is-on {
+  background: var(--hot-soft);
+  box-shadow: inset 2px 0 0 var(--hot);
+}
+.dd-item:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.dd-item .team-bar {
+  height: 14px;
+  align-self: center;
+}
+.dd-pos {
+  width: 26px;
+  text-align: right;
+  color: var(--ink-3);
+  font-size: 11px;
+}
+.dd-fast {
+  justify-content: space-between;
+  color: var(--green);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  background: rgb(16, 19, 23);
+  z-index: 1;
+}
+
+/* ---- telemetry tab ------------------------------------------------------------------- */
+
+.tel-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 372px;
+  gap: 8px;
+}
+
+.tel-chart {
+  display: flex;
+  flex-direction: column;
+  animation: rise 0.6s 0.05s var(--ease-out) both;
+}
+
+.legend {
+  display: flex;
+  gap: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.04em;
+}
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.legend i {
+  width: 14px;
+  height: 3px;
+  border-radius: 1px;
+}
+.legend em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+.chart-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+.chart-hint .kbd:not(:first-child) {
+  margin-left: 8px;
+}
+
+.link-btn {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hot);
+}
+.link-btn:hover {
+  color: var(--ink);
+}
+
+.tracechart {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.chart-empty,
+.chart-loading {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--ink-3);
+  gap: 8px;
+  padding: 40px;
+}
+.chart-loading {
+  position: absolute;
+  inset: 34px 0 0;
+  background: rgba(11, 13, 16, 0.7);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.trace-tip {
+  top: 34px;
+  transform: translateX(14px);
+  padding: 9px 11px;
+}
+.trace-tip.is-left {
+  transform: translateX(calc(-100% - 14px));
+}
+.trace-tip-head {
+  font-size: 10.5px;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.trace-tip table {
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+.trace-tip th {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: right;
+  padding: 0 0 4px 14px;
+}
+.trace-tip th i {
+  display: inline-block;
+  width: 8px;
+  height: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.trace-tip td {
+  padding: 1.5px 0 1.5px 14px;
+  text-align: right;
+}
+.trace-tip td:first-child {
+  padding-left: 0;
+  text-align: left;
+  font-family: var(--sans);
+  color: var(--ink-3);
+}
+.trace-tip-delta {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line-2);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+
+.tel-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  animation: rise 0.6s 0.12s var(--ease-out) both;
+}
+
+.tel-map {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.trackmap {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  cursor: crosshair;
+}
+
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.map-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.map-legend span i {
+  width: 12px;
+  height: 4px;
+}
+.map-legend .dim {
+  margin-left: auto;
+}
+.map-legend .ramp {
+  flex: 1;
+  height: 4px;
+}
+
+.tel-table {
+  flex: none;
+  padding: 4px 12px 8px;
+}
+.tel-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.tel-table th {
+  padding: 8px 0 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: right;
+  border-bottom: 1px solid var(--line-2);
+}
+.tel-table th i {
+  display: inline-block;
+  width: 8px;
+  height: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.tel-table th:last-child {
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.tel-table td {
+  padding: 6px 0;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+}
+.tel-table tr:last-child td {
+  border-bottom: 0;
+}
+.tel-table td:first-child {
+  text-align: left;
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+.tel-table td.is-best {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .race-telemetry {
+    height: auto;
+    overflow: visible;
+  }
+  .tel-grid {
+    grid-template-columns: 1fr;
+  }
+  .tel-chart {
+    height: 620px;
+  }
+  .tel-map {
+    height: 340px;
+    flex: none;
+  }
+  .pair-result {
+    width: 100%;
+    align-items: flex-start;
+    margin-left: 0;
+  }
+  .dd-btn .dd-name {
+    display: none;
+  }
+}
