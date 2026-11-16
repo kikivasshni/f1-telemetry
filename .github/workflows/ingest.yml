@@ -1,0 +1,73 @@
+name: Ingest
+
+# Pulls any race that has finished since the last run, refreshes the results history,
+# retrains the predictor, commits the new files and redeploys the site.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC, after a race weekend
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Season to ingest
+        required: false
+      force:
+        description: Rebuild sessions that are already in the lake
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # raw upstream responses: lets a failed or rate-limited run resume
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: raw-${{ github.run_id }}
+          restore-keys: raw-
+
+      - name: Sessions from OpenF1
+        run: node pipeline/run.mjs ${{ inputs.year && format('--year {0}', inputs.year) || '' }} ${{ inputs.force && '--force' || '' }}
+
+      - name: Results history from Jolpica
+        run: node pipeline/history.mjs
+
+      - name: Train the predictor
+        run: node pipeline/predict.mjs
+
+      - name: Commit the lake
+        id: commit
+        run: |
+          git config user.name "${{ github.repository_owner }}"
+          git config user.email "${{ github.repository_owner_id }}+${{ github.repository_owner }}@users.noreply.github.com"
+          git add public/data
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Refresh the data lake"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: ingest
+    if: needs.ingest.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy.yml

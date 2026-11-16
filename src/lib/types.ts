@@ -26,6 +26,7 @@ export interface TrackModel {
   sectors: number[];
   rotation: number;
   refLap: { n: number; lap: number; d: number };
+  cornerSource?: 'map' | 'detected';
 }
 
 export interface Lap {
@@ -109,7 +110,7 @@ export interface SessionMeta {
   hasDrs: boolean;
   drivers: Driver[];
   track: TrackModel;
-  pos: { dt: number; samples: number; quantum: number; cx: number; cy: number; order: number[] };
+  pos: { dt: number; samples: number; quantum: number; cx: number; cy: number; order: number[]; coverage?: number };
   laps: Record<number, Lap[]>;
   stints: Stint[];
   pits: PitStop[];
@@ -159,6 +160,7 @@ export interface RaceSummary {
   laps?: number;
   length?: number;
   climb?: number;
+  coverage?: number;
   winner?: (Driver & { time: number | null }) | null;
   podium?: { code: string; colour: string }[];
   headline?: string;

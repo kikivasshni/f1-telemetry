@@ -470,6 +470,26 @@
     radial-gradient(ellipse at center, transparent 55%, rgba(7, 8, 10, 0.55) 100%);
 }
 
+.stage-notice {
+  position: absolute;
+  left: 50%;
+  top: 52px;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 32px));
+  padding: 10px 14px;
+  border: 1px solid var(--yellow);
+  border-left-width: 3px;
+  background: rgba(16, 19, 23, 0.9);
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  z-index: 3;
+}
+.stage-notice b {
+  color: var(--ink);
+}
+
 .stage-fallback {
   position: absolute;
   inset: 0;

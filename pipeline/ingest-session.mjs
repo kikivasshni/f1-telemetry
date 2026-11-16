@@ -155,15 +155,26 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
 
   // ---- fastest clean lap: reference for the track model -----------------------------
   const pitLaps = new Set(pitRaw.map((p) => `${p.driver_number}:${p.lap_number}`));
-  let ref = null;
+  const candidates = [];
   for (const n of nums) {
     for (const l of laps[n]) {
       if (l.d == null || l.t == null || l.out || l.lap === 1 || pitLaps.has(`${n}:${l.lap}`)) continue;
-      if (!ref || l.d < ref.d) ref = { n, ...l };
+      candidates.push({ n, ...l });
     }
   }
-  if (!ref) throw new Error(`session ${key} has no usable reference lap`);
-  const refTrace = locations.get(ref.n).filter((p) => p[0] >= ref.t && p[0] <= ref.t + ref.d);
+  candidates.sort((x, y) => x.d - y.d);
+  // the reference lap needs a complete position trace, which not every car has
+  let ref = null;
+  let refTrace = [];
+  for (const c of candidates.slice(0, 400)) {
+    const trace = locations.get(c.n).filter((p) => p[0] >= c.t && p[0] <= c.t + c.d);
+    if (trace.length >= c.d * 2.5) {
+      ref = c;
+      refTrace = trace;
+      break;
+    }
+  }
+  if (!ref) throw new Error(`session ${key} has no lap with a usable position trace`);
 
   // ---- track centreline ------------------------------------------------------------
   let circuit = null;
@@ -231,11 +242,39 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
     const b = sampleAt(refTrace, ref.t + ref.s[0] + ref.s[1]);
     sectors.push(round(distOf(a[1], a[2]), 0), round(distOf(b[1], b[2]), 0));
   }
-  const corners = (circuit?.corners ?? []).map((c) => {
+  let corners = (circuit?.corners ?? []).map((c) => {
     const x = c.trackPosition.x / 10;
     const y = c.trackPosition.y / 10;
     return { n: c.number, label: `${c.number}${c.letter ?? ''}`, d: round(distOf(x, y), 0), x: round(x), y: round(y), a: round(c.angle, 0) };
   });
+
+  if (!corners.length) {
+    // no corner map for this circuit: call every clear speed minimum of the reference lap a corner
+    const lapTel = telemetry.get(ref.n).filter((r) => r.t / 1000 >= ref.t && r.t / 1000 <= ref.t + ref.d);
+    const SPAN = 9;
+    let peak = 0;
+    for (let i = 0; i < lapTel.length; i++) {
+      const v = lapTel[i].speed;
+      peak = Math.max(peak, v);
+      const lo = Math.max(0, i - SPAN);
+      const hi = Math.min(lapTel.length - 1, i + SPAN);
+      let isMin = true;
+      let after = 0;
+      for (let k = lo; k <= hi; k++) {
+        if (lapTel[k].speed < v || (lapTel[k].speed === v && k < i)) isMin = false;
+        if (k > i) after = Math.max(after, lapTel[k].speed);
+      }
+      if (!isMin || peak - v < 30 || after - v < 12) continue;
+      const at = sampleAt(refTrace, lapTel[i].t / 1000);
+      const idx = nearestIndex(centre, at[1], at[2]).index;
+      const a = centre[(idx - 2 + centre.length) % centre.length];
+      const b = centre[(idx + 2) % centre.length];
+      const number = corners.length + 1;
+      corners.push({ n: number, label: String(number), d: round(idx * step, 0), x: round(at[1]), y: round(at[2]), a: round((Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI + 90, 0) });
+      peak = v;
+    }
+    corners = corners.sort((x, y) => x.d - y.d).map((c, i) => ({ ...c, n: i + 1, label: String(i + 1) }));
+  }
 
   const track = {
     length: round(trackLength, 1),
@@ -246,6 +285,7 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
     corners,
     sectors,
     rotation: circuit?.rotation ?? 0,
+    cornerSource: circuit?.corners?.length ? 'map' : 'detected',
     refLap: { n: ref.n, lap: ref.lap, d: ref.d },
   };
 
@@ -266,7 +306,10 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
   const quantum = Math.max(0.1, Math.ceil((reach / 32000) * 20) / 20);
 
   const posBuf = new Int16Array(samples * 2 * nums.length);
+  const covered = [];
+  const raceFrom = Math.floor((raceStartMs - w0) / 1000 / DT);
   nums.forEach((n, di) => {
+    let live = 0;
     const trace = locations.get(n);
     const xs = new Int16Array(samples);
     const ys = new Int16Array(samples);
@@ -283,6 +326,7 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
           const f = (t - a[0]) / (b[0] - a[0] || 1);
           x = a[1] + (b[1] - a[1]) * f;
           y = a[2] + (b[2] - a[2]) * f;
+          if (i >= raceFrom) live++;
         } else {
           x = a[1];
           y = a[2];
@@ -291,12 +335,16 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
       xs[i] = Math.round((x - cx) / quantum);
       ys[i] = Math.round((y - cy) / quantum);
     }
+    covered.push(live / Math.max(1, samples - raceFrom));
     const base = di * samples * 2;
     for (let i = 0; i < samples; i++) {
       posBuf[base + i] = i ? xs[i] - xs[i - 1] : xs[0];
       posBuf[base + samples + i] = i ? ys[i] - ys[i - 1] : ys[0];
     }
   });
+
+  // share of the race for which the typical car has position data (upstream gaps happen)
+  const posCoverage = round([...covered].sort((a, b) => a - b)[Math.floor(covered.length / 2)] ?? 0, 3);
 
   // ---- telemetry files -------------------------------------------------------------
   await mkdir(new URL('tel/', outDir), { recursive: true });
@@ -404,10 +452,11 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
       open = { type: 'SC', t: m.t };
     } else if (text.includes('SAFETY CAR IN THIS LAP')) {
       if (open?.type === 'SC') scheduledClose = m.t + 75;
-    } else if (m.flag === 'RED') {
+    } else if (m.flag === 'RED' || /(^|[^A-Z])RED FLAG/.test(text)) {
+      if (open?.type === 'RED') continue;
       close(m.t);
       open = { type: 'RED', t: m.t };
-    } else if (m.flag === 'GREEN' && open?.type === 'RED') {
+    } else if ((m.flag === 'GREEN' || text.includes('GREEN LIGHT')) && open?.type === 'RED') {
       close(m.t);
     } else if (m.flag === 'CHEQUERED') {
       close(m.t);
@@ -469,7 +518,7 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
     hasDrs,
     drivers,
     track,
-    pos: { dt: DT, samples, quantum, cx, cy, order: nums },
+    pos: { dt: DT, samples, quantum, cx, cy, order: nums, coverage: posCoverage },
     laps,
     stints,
     pits,
@@ -508,6 +557,7 @@ export async function ingestSession({ session, meeting, round: roundNo, outDir, 
     laps: meta.totalLaps,
     length: track.length,
     climb: round(Math.max(...track.z), 0),
+    coverage: posCoverage,
     winner: winner ? { ...byNum.get(winner.n), time: winner.time } : null,
     podium,
     headline: report.headline,

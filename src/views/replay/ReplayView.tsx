@@ -126,6 +126,11 @@ export function ReplayView() {
         <div className="stage-canvas" ref={host} />
         {!webgl && <div className="stage-fallback">This view needs WebGL, which is not available in this browser.</div>}
         <div className="stage-vignette" />
+        {(session.meta.pos.coverage ?? 1) < 0.7 && (
+          <div className="stage-notice">
+            <b>Car positions are incomplete for this race.</b> The source has them for {Math.round((session.meta.pos.coverage ?? 0) * 100)}% of the distance, so cars stop moving on the map. Timing, telemetry and the report are complete.
+          </div>
+        )}
 
         <div className="stage-top">
           <div className="seg" role="group" aria-label="Camera">
